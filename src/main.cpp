@@ -58,7 +58,16 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+
+lemlib_tarball::Decoder decoder(my_lemlib_tarball_file_txt);
+
+void autonomous() {
+	chassis.setPose(40, 0, 0);
+
+	// Parameters: path, lookahead distance, timeout
+	//chassis.follow(decoder["Path 1"], 10, 2000);
+  	//chassis.follow(decoder["Path 2"], 10, 2000);
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -73,18 +82,77 @@ void autonomous() {}
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
+
+bool isClamped = false;
+bool isIntaking = false;
+bool intakeReversed = false;
+
+void buttonControls(void* param) {
+   while(true) {
+		controller.clear_line(1);
+		controller.print(1, 1, "%d", isIntaking);
+		if(controller.get_digital(DIGITAL_A) && isClamped) {
+			clamp.set_value(false);
+			isClamped = false;
+			while(controller.get_digital(DIGITAL_A)){
+				pros::delay(50);
+			}
+		}
+		else if(controller.get_digital(DIGITAL_A) && !isClamped) {
+			clamp.set_value(true);
+			isClamped = true;
+			while(controller.get_digital(DIGITAL_A)){
+				pros::delay(50);
+			}
+		}
+   	if (controller.get_digital(DIGITAL_R2) && (!isIntaking || intakeReversed)) {
+			intake.move(127);
+			isIntaking = true;
+			intakeReversed = false;
+			while(controller.get_digital(DIGITAL_R2)){
+				pros::delay(50);
+			}
+		}
+		else if (controller.get_digital(DIGITAL_R2) && isIntaking && !intakeReversed) {
+			intake.brake();
+			isIntaking = false;
+			intakeReversed = false;
+			while(controller.get_digital(DIGITAL_R2)){
+				pros::delay(50);
+			}
+		}
+		else if(controller.get_digital(DIGITAL_R1) && (!isIntaking || !intakeReversed)) {
+			intake.move(-127);
+			isIntaking = true;
+			intakeReversed = true;
+			while(controller.get_digital(DIGITAL_R1)){
+				pros::delay(50);
+			}
+		}
+		else if(controller.get_digital(DIGITAL_R1) && isIntaking && intakeReversed) {
+			intake.brake();
+			isIntaking = false;
+			intakeReversed = false;
+			while(controller.get_digital(DIGITAL_R1)){
+				pros::delay(50);
+			}
+		}
+	}
+}
+
+
 void opcontrol() {
+
+	pros::Task BUTTON_CONTROLLS(buttonControls);
+	leftMotors.set_brake_mode_all(pros::MotorBrake::brake);
+	rightMotors.set_brake_mode_all(pros::MotorBrake::brake);
 
 	while (true) {
 		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
 		                 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
 		                 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);  // Prints status of the emulated screen LCDs
 
-		// Arcade control scheme
-		int dir = controller.get_analog(ANALOG_LEFT_Y);    // Gets amount forward/backward from left joystick
-		int turn = controller.get_analog(ANALOG_RIGHT_X);  // Gets the turn left/right from right joystick
-		leftMotors.move(dir - turn);                       // Sets left motor voltage
-		rightMotors.move(dir + turn);                      // Sets right motor voltage
+		chassis.arcade(controller.get_analog(ANALOG_LEFT_Y), controller.get_analog(ANALOG_RIGHT_X));
 		pros::delay(20);                                   // Run for 20 ms then update
 	}
 }

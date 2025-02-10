@@ -34,9 +34,11 @@
  */
 #define PROS_USE_LITERALS
 
-#include "api.h"
-#include "devices.h"
-#include "lemlib/api.hpp" // IWYU pragma: keep
+#include "api.h"                    // IWYU pragma: keep
+#include "devices.h"                // IWYU pragma: keep
+#include "lemlib/api.hpp"           // IWYU pragma: keep
+#include "lemlib-tarball/api.hpp"   // IWYU pragma: keep
+ASSET(my_lemlib_tarball_file_txt);
 
 /**
  * You should add more #includes here

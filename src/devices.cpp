@@ -6,9 +6,7 @@ pros::MotorGroup rightMotors({1, 2, 3}, pros::MotorGearset::blue);
 pros::MotorGroup leftMotors({-8, -9, -10}, pros::MotorGearset::blue);
 
 pros::Imu inertialSensor = pros::Imu::get_imu();
-
 pros::Rotation horizontalEncoder(1);
-
 lemlib::TrackingWheel horizontalTrackingWheel(&horizontalEncoder, lemlib::Omniwheel::NEW_275, -5.75);
 
 // drivetrain settings
@@ -61,3 +59,9 @@ lemlib::Chassis chassis(
     angularController,  // angular PID settings
     sensors             // odometry sensors
 );
+
+pros::Motor intake(5, pros::MotorGearset::green);
+
+pros::Motor wallStakeArm(7, pros::MotorGearset::red);
+
+pros::ADIDigitalOut clamp ('A');

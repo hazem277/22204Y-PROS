@@ -34,11 +34,11 @@
  */
 #define PROS_USE_LITERALS
 
-#include "api.h"                    // IWYU pragma: keep
-#include "devices.h"                // IWYU pragma: keep
-#include "lemlib/api.hpp"           // IWYU pragma: keep
-#include "lemlib-tarball/api.hpp"   // IWYU pragma: keep
-ASSET(my_lemlib_tarball_file_txt);
+#include "api.h"                    // IWYU pragma: export
+#include "lemlib/api.hpp"           // IWYU pragma: export
+#include "lemlib-tarball/api.hpp"   // IWYU pragma: export
+#include "liblvgl/lvgl.h"           // IWYU pragma: export
+#include "graphics.h"               // IWYU pragma: export
 
 /**
  * You should add more #includes here
